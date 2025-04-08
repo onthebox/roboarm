@@ -1,0 +1,192 @@
+<robot name="roboarm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Xacro properties -->
+    <xacro:property name="base_length" value="0.5" />
+    <xacro:property name="base_height" value="0.1" />
+    <xacro:property name="body_radius" value="0.1" />
+    <xacro:property name="body_length" value="0.4" />
+    <xacro:property name="root_radius" value="0.05" />
+    <xacro:property name="root_length" value="0.05" />
+    <xacro:property name="arm_width" value="0.05" />
+    <xacro:property name="arm_length" value="0.5" />
+    <!-- Xacro macros -->
+    <xacro:macro name="cylinder_link" params="name r l ox oy oz oroll opitch oyaw mass material">
+        <link name="${name}_link">
+            <visual>
+                <geometry>
+                    <cylinder radius="${r}" length="${l}" />
+                </geometry>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="${oroll} ${opitch} ${oyaw}" />
+                <material name="${material}" />
+            </visual>
+            <xacro:cylinder_inertia m="${mass}" r="${r}" l="${l}" o_xyz="${ox} ${oy} ${oz}" o_rpy="${oroll} ${opitch} ${oyaw}" />
+            <collision>
+                <geometry>
+                    <cylinder radius="${r}" length="${l}" />
+                </geometry>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="${oroll} ${opitch} ${oyaw}" />
+            </collision>
+        </link>
+    </xacro:macro>
+    <xacro:macro name="box_link" params="name x y z ox oy oz mass material">
+        <link name="${name}_link">
+            <visual>
+                <geometry>
+                    <box size="${x} ${y} ${z}" />
+                </geometry>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="0 0 0" />
+                <material name="${material}" />
+            </visual>
+            <xacro:box_inertia m="10.0" x="${x}" y="${y}" z="${z}" o_xyz="${ox} ${oy} ${oz}" o_rpy="0 0 0" />
+            <collision>
+                <geometry>
+                    <box size="${x} ${y} ${z}" />
+                </geometry>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="0 0 0" />
+            </collision>
+        </link>
+    </xacro:macro>
+    <xacro:macro name="box_inertia" params="m x y z o_xyz o_rpy">
+        <inertial>
+        <mass value="${m}" />
+        <origin xyz="${o_xyz}" rpy="${o_rpy}" />
+        <inertia ixx="${(m/12) * (z*z + y*y)}" ixy="0" ixz="0"
+                 iyy="${(m/12) * (x*x + z*z)}" iyz="0"
+                 izz="${(m/12) * (x*x + y*y)}" />
+        </inertial>
+    </xacro:macro>
+    <xacro:macro name="cylinder_inertia" params="m r l o_xyz o_rpy">
+        <inertial>
+            <mass value="${m}" />
+            <origin xyz="${o_xyz}" rpy="${o_rpy}" />
+            <inertia ixx="${(m/12) * (3*r*r + l*l)}" ixy="0" ixz="0"
+                     iyy="${(m/12) * (3*r*r + l*l)}" iyz="0"
+                     izz="${(m/2) * (r*r)}" />
+        </inertial>
+    </xacro:macro>
+    <xacro:macro name="sphere_inertia" params="m r o_xyz o_rpy">
+        <inertial>
+            <mass value="${m}" />
+            <origin xyz="${o_xyz}" rpy="${o_rpy}" />
+            <inertia ixx="${(2/5) * m * r * r}" ixy="0" ixz="0"
+                     iyy="${(2/5) * m * r * r}" iyz="0"
+                     izz="${(2/5) * m * r * r}" />
+        </inertial>
+    </xacro:macro>
+    <!-- Materials -->
+    <material name="black">
+        <color rgba="0 0 0 1" />
+    </material>
+    <material name="orange">
+        <color rgba="1 0.64 0 1" />
+    </material>
+    <material name="gray">
+        <color rgba="0.7 0.7 0.7 1" />
+    </material>
+
+
+
+    <!-- Links -->
+    <link name="base_dummy_link" />
+    <!-- Making base_link -->
+    <xacro:box_link name="base" x="${base_length}" y="${base_length}" z="${base_height}" ox="0" oy="0" oz="${base_height  / 2}" mass="10" material="black" />
+    <!-- Making body_link -->
+    <xacro:cylinder_link name="body" r="${body_radius}" l="${body_length}" ox="0" oy="0" oz="${body_length / 2}" oroll="0" opitch="0" oyaw="0" mass="5.0" material="orange" />
+    <!-- Making root1_link -->
+    <xacro:cylinder_link name="root1" r="${root_radius}" l="${root_length}" ox="0" oy="${root_length / 2}" oz="0" oroll="${pi / 2}" opitch="0" oyaw="0" mass="0.1" material="gray" />
+    <!-- Making shoulder link -->
+    <xacro:box_link name="shoulder" x="${arm_width}" y="${arm_width}" z="${arm_length}" ox="0" oy="${arm_width / 2}" oz="${(arm_length / 2) - root_radius}" mass="0.2" material="orange" />
+    <!-- Making root2_link -->
+    <xacro:cylinder_link name="root2" r="${root_radius}" l="${root_length}" ox="0" oy="${-root_length / 2}" oz="0" oroll="${pi / 2}" opitch="0" oyaw="0" mass="0.1" material="gray" />
+    <!-- Making forearm_link -->
+    <xacro:box_link name="forearm" x="${arm_width}" y="${arm_width}" z="${arm_length}" ox="0" oy="${-arm_width / 2}" oz="${(arm_length / 2) - root_radius}" mass="0.2" material="orange" />
+    <!-- Making root3_link -->
+    <xacro:cylinder_link name="root3" r="${root_radius}" l="${root_length}" ox="0" oy="${root_length / 2}" oz="0" oroll="${pi / 2}" opitch="0" oyaw="0" mass="0.1" material="gray" />
+    <!-- Making wrist_link -->
+    <xacro:box_link name="wrist" x="${arm_width}" y="${arm_width}" z="${arm_length / 2}" ox="0" oy="${arm_width / 2}" oz="${(arm_length / 4) - root_radius}" mass="0.1" material="orange" />
+    <!-- Making root4_link -->
+    <xacro:cylinder_link name="root4" r="${root_radius}" l="${root_length}" ox="0" oy="0" oz="${root_length / 2}" oroll="0" opitch="0" oyaw="0" mass="0.1" material="gray" />
+    <!-- Making palm link -->
+    <xacro:box_link name="palm" x="${arm_width * 3}" y="${arm_width}" z="${arm_width}" ox="0" oy="0" oz="${arm_width / 2}" mass="0.05" material="orange" />
+    <!-- Making left_finger_link -->
+    <xacro:box_link name="left_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.02" material="orange" />
+    <!-- Making right_finger_link -->
+    <xacro:box_link name="right_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.02" material="orange" />
+    
+    
+    
+    <!-- Joints -->
+    <joint name="dummy_base_joint" type="fixed">
+        <parent link="base_dummy_link" />
+        <child link="base_link" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    <joint name="base_body_joint" type="revolute">
+        <parent link="base_link" />
+        <child link="body_link" />
+        <origin xyz="0 0 ${base_height}" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>
+    </joint>
+    <joint name="body_root1_joint" type="revolute">
+        <parent link="body_link" />
+        <child link="root1_link" />
+        <origin xyz="0 ${body_radius} ${body_length - root_radius}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+    </joint>
+    <joint name="root1_shoulder_joint" type="fixed">
+        <parent link="root1_link" />
+        <child link="shoulder_link" />
+        <origin xyz="0 ${root_length} 0" rpy="0 0 0" />
+    </joint>
+    <joint name="shoulder_root2_joint" type="revolute">
+        <parent link="shoulder_link" />
+        <child link="root2_link" />
+        <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+    </joint>
+    <joint name="root2_forearm_joint" type="fixed">
+        <parent link="root2_link" />
+        <child link="forearm_link" />
+        <origin xyz="0 ${-root_length} 0" rpy="0 0 0" />
+    </joint>
+    <joint name="forearm_root3_joint" type="revolute">
+        <parent link="forearm_link" />
+        <child link="root3_link" />
+        <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+    </joint>
+    <joint name="root3_wrist_joint" type="fixed">
+        <parent link="root3_link" />
+        <child link="wrist_link" />
+        <origin xyz="0 ${root_length} 0" rpy="0 0 0" />
+    </joint>
+    <joint name="wrist_root4_joint" type="revolute">
+        <parent link="wrist_link" />
+        <child link="root4_link" />
+        <origin xyz="0 ${arm_width / 2} ${(arm_length * 0.5) - root_radius}" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+    </joint>
+    <joint name="root4_palm_joint" type="fixed">
+        <parent link="root4_link" />
+        <child link="palm_link" />
+        <origin xyz="0 0 ${root_length}" rpy="0 0 0" />
+    </joint>
+    <joint name="palm_left_finger_joint" type="prismatic">
+        <parent link="palm_link" />
+        <child link="left_finger_link" />
+        <origin xyz="${(-arm_width * 3 / 2) + (arm_width * 0.5 / 2)} 0 ${arm_width}" rpy="0 0 0" />
+        <axis xyz="1 0 0" />
+        <limit lower="0" upper="${(arm_width * 3 / 2) - (arm_width * 0.5)}" velocity="100" effort="100"/>  
+    </joint>
+    <joint name="palm_right_finger_joint" type="prismatic">
+        <parent link="palm_link" />
+        <child link="right_finger_link" />
+        <origin xyz="${(arm_width * 3 / 2) - (arm_width * 0.5 / 2)} 0 ${arm_width}" rpy="0 0 0" />
+        <axis xyz="1 0 0" />
+        <limit lower="${-(arm_width * 3 / 2) + (arm_width * 0.5)}" upper="0" velocity="100" effort="100"/>  
+    </joint>
+</robot>
