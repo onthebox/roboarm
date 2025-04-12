@@ -1,4 +1,12 @@
 <robot name="roboarm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Include Gazebo Parameters -->
+    <xacro:include filename="$(find roboarm_description)/urdf/roboarm_gazebo.xacro" />
+
+    <!-- Include ros2_control Plugins -->
+    <xacro:include filename="$(find roboarm_description)/urdf/roboarm_ros2_control.xacro" />
+
+
     <!-- Xacro properties -->
     <xacro:property name="base_length" value="0.5" />
     <xacro:property name="base_height" value="0.1" />
@@ -86,7 +94,8 @@
 
 
     <!-- Links -->
-    <link name="base_dummy_link" />
+    <!-- <link name="base_dummy_link" /> -->
+    <link name="world"/>
     <!-- Making base_link -->
     <xacro:box_link name="base" x="${base_length}" y="${base_length}" z="${base_height}" ox="0" oy="0" oz="${base_height  / 2}" mass="10" material="black" />
     <!-- Making body_link -->
@@ -115,8 +124,8 @@
     
     
     <!-- Joints -->
-    <joint name="dummy_base_joint" type="fixed">
-        <parent link="base_dummy_link" />
+    <joint name="world_base_joint" type="fixed">
+        <parent link="world" />
         <child link="base_link" />
         <origin xyz="0 0 0" rpy="0 0 0" />
     </joint>
@@ -125,14 +134,14 @@
         <child link="body_link" />
         <origin xyz="0 0 ${base_height}" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>
     </joint>
     <joint name="body_root1_joint" type="revolute">
         <parent link="body_link" />
         <child link="root1_link" />
         <origin xyz="0 ${body_radius} ${body_length - root_radius}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>    
     </joint>
     <joint name="root1_shoulder_joint" type="fixed">
         <parent link="root1_link" />
@@ -144,7 +153,7 @@
         <child link="root2_link" />
         <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>    
     </joint>
     <joint name="root2_forearm_joint" type="fixed">
         <parent link="root2_link" />
@@ -156,7 +165,7 @@
         <child link="root3_link" />
         <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>    
     </joint>
     <joint name="root3_wrist_joint" type="fixed">
         <parent link="root3_link" />
@@ -168,7 +177,7 @@
         <child link="root4_link" />
         <origin xyz="0 ${arm_width / 2} ${(arm_length * 0.5) - root_radius}" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit lower="${-pi}" upper="${pi}" velocity="100" effort="100"/>    
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>    
     </joint>
     <joint name="root4_palm_joint" type="fixed">
         <parent link="root4_link" />
@@ -180,13 +189,14 @@
         <child link="left_finger_link" />
         <origin xyz="${(-arm_width * 3 / 2) + (arm_width * 0.5 / 2)} 0 ${arm_width}" rpy="0 0 0" />
         <axis xyz="1 0 0" />
-        <limit lower="0" upper="${(arm_width * 3 / 2) - (arm_width * 0.5)}" velocity="100" effort="100"/>  
+        <limit lower="0" upper="${(arm_width * 3 / 2) - (arm_width * 0.5)}" velocity="2.0" effort="100"/>  
     </joint>
     <joint name="palm_right_finger_joint" type="prismatic">
         <parent link="palm_link" />
         <child link="right_finger_link" />
         <origin xyz="${(arm_width * 3 / 2) - (arm_width * 0.5 / 2)} 0 ${arm_width}" rpy="0 0 0" />
         <axis xyz="1 0 0" />
-        <limit lower="${-(arm_width * 3 / 2) + (arm_width * 0.5)}" upper="0" velocity="100" effort="100"/>  
+        <limit lower="${-(arm_width * 3 / 2) + (arm_width * 0.5)}" upper="0" velocity="2.0" effort="100"/>  
+        <mimic joint="palm_left_finger_joint" multiplier="-1" />
     </joint>
 </robot>

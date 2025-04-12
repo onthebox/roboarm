@@ -1,0 +1,53 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100 # Hz
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # gripper_controller:
+    #   type: forward_command_controller/ForwardCommandController
+
+    gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+arm_controller:
+  ros__parameters:
+    joints:
+      - base_body_joint
+      - body_root1_joint
+      - shoulder_root2_joint
+      - forearm_root3_joint
+      - wrist_root4_joint
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    open_loop_control: true
+    allow_partial_joints_goal: true
+    allow_integration_in_goal_trajectories: true
+
+gripper_controller:
+  ros__parameters:
+    joints:
+      - palm_left_finger_joint
+      
+    # interface_name: position
+      
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    open_loop_control: true
+    allow_partial_joints_goal: true
+    allow_integration_in_goal_trajectories: true
