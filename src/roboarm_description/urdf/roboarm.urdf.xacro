@@ -130,7 +130,7 @@
         <origin xyz="0 0 ${base_height}" rpy="0 0 0" />
         <axis xyz="0 0 1" />
         <dynamics damping="${damping}" friction="${friction}"/> 
-        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>
     </joint>
 
     <transmission name="base_body_joint_trans">
@@ -256,7 +256,7 @@
         <child link="root4_link" />
         <origin xyz="0 ${arm_width / 2} ${(arm_length * 0.5) - root_radius}" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
         <dynamics damping="${damping}" friction="${friction}"/> 
     </joint>
 
