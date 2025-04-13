@@ -75,33 +75,6 @@
                      izz="${(m/2) * (r*r)}" />
         </inertial>
     </xacro:macro>
-    <!-- <xacro:macro name="box_inertia" params="m x y z o_xyz o_rpy">
-        <inertial>
-        <mass value="${m}" />
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <inertia ixx="1.0" ixy="0" ixz="0"
-                 iyy="1.0" iyz="0"
-                 izz="1.0" />
-        </inertial>
-    </xacro:macro>
-    <xacro:macro name="cylinder_inertia" params="m r l o_xyz o_rpy">
-        <inertial>
-            <mass value="${m}" />
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <inertia ixx="1.0" ixy="0" ixz="0"
-                     iyy="1.0" iyz="0"
-                     izz="1.0" />
-        </inertial>
-    </xacro:macro>
-    <xacro:macro name="sphere_inertia" params="m r o_xyz o_rpy">
-        <inertial>
-            <mass value="${m}" />
-            <origin xyz="${o_xyz}" rpy="${o_rpy}" />
-            <inertia ixx="${(2/5) * m * r * r}" ixy="0" ixz="0"
-                     iyy="${(2/5) * m * r * r}" iyz="0"
-                     izz="${(2/5) * m * r * r}" />
-        </inertial>
-    </xacro:macro> -->
     <!-- Materials -->
     <material name="black">
         <color rgba="0 0 0 1" />
@@ -163,10 +136,10 @@
     <transmission name="base_body_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="base_body_joint">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="base_body_joint_motor">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -184,17 +157,17 @@
         <child link="root1_link" />
         <origin xyz="0 ${body_radius} ${body_length - root_radius}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi / 4}" upper="${pi / 4}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
         <dynamics damping="${damping}" friction="${friction}"/> 
     </joint>
 
     <transmission name="body_root1_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="body_root1_joint">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="body_root1_joint_motor">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -217,17 +190,17 @@
         <child link="root2_link" />
         <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi / 4}" upper="${pi / 4}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
         <dynamics damping="${damping}" friction="${friction}"/> 
     </joint>
 
     <transmission name="shoulder_root2_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="shoulder_root2_joint">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="shoulder_root2_joint_motor">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -250,17 +223,17 @@
         <child link="root3_link" />
         <origin xyz="0 0 ${arm_length - (2 * root_radius)}" rpy="0 0 0" />
         <axis xyz="0 1 0" />
-        <limit lower="${-pi / 4}" upper="${pi / 4}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
         <dynamics damping="${damping}" friction="${friction}"/>   
     </joint>
 
     <transmission name="forearm_root3_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="forearm_root3_joint">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="forearm_root3_joint_motor">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -283,17 +256,17 @@
         <child link="root4_link" />
         <origin xyz="0 ${arm_width / 2} ${(arm_length * 0.5) - root_radius}" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit lower="${-pi / 2}" upper="${pi / 2}" velocity="2.0" effort="100"/>
+        <limit lower="${-pi}" upper="${pi}" velocity="2.0" effort="100"/>
         <dynamics damping="${damping}" friction="${friction}"/> 
     </joint>
 
     <transmission name="wrist_root4_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="wrist_root4_joint">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="wrist_root4_joint_motor">
-          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -318,6 +291,18 @@
         <axis xyz="1 0 0" />
         <limit lower="0" upper="${(arm_width * 3 / 2) - (arm_width * 0.5)}" velocity="2.0" effort="100"/>  
     </joint>
+
+    <transmission name="palm_left_finger_joint_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="palm_left_finger_joint">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="palm_left_finger_joint_motor">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
     <joint name="palm_right_finger_joint" type="prismatic">
         <parent link="palm_link" />
         <child link="right_finger_link" />

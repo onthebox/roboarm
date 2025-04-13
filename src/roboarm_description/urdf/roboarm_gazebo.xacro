@@ -2,11 +2,51 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="roboarm">
 
     <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-        <robot_param>robot_description</robot_param>
-        <robot_param_node>robot_state_publisher</robot_param_node>
-        <parameters>$(find roboarm_controller)/config/roboarm_controller.yaml</parameters>
-    </plugin>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+            <robot_param>robot_description</robot_param>
+            <robot_param_node>robot_state_publisher</robot_param_node>
+            <parameters>$(find roboarm_controller)/config/roboarm_controller.yaml</parameters>
+        </plugin>
     </gazebo>
+
+    <!-- Adding colors to robot part as in gazebo classic tag material doesnt work -->
+
+    <gazebo reference="base_link">
+        <material>Gazebo/Black</material>
+    </gazebo>
+    <gazebo reference="body_link">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="shoulder_link">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="forearm_link">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="wrist_link">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="palm_link">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="left_finger_link">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="right_finger_link">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="root1_link">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+    <gazebo reference="root2_link">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+    <gazebo reference="root3_link">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+    <gazebo reference="root4_link">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
 
 </robot>

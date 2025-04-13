@@ -5,9 +5,6 @@ controller_manager:
     arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
-    # gripper_controller:
-    #   type: forward_command_controller/ForwardCommandController
-
     gripper_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
@@ -25,9 +22,11 @@ arm_controller:
 
     command_interfaces:
       - position
+      # - velocity
 
     state_interfaces:
       - position
+      # - velocity
 
     open_loop_control: true
     allow_partial_joints_goal: true
@@ -37,8 +36,6 @@ gripper_controller:
   ros__parameters:
     joints:
       - palm_left_finger_joint
-      
-    # interface_name: position
       
     command_interfaces:
       - position
