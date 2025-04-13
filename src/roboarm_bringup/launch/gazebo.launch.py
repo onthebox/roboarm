@@ -37,21 +37,29 @@ def generate_launch_description():
 
     start_gazebo_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzserver.launch.py')
-        )
+            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
+        ),
+        # launch_arguments={'gz_args': '-r -s -v4 /home/vitya/zero_gravity.world', 'on_exit_shutdown': 'true'}.items()
+        launch_arguments={'gz_args': '-r -s -v4 empty.sdf', 'on_exit_shutdown': 'true'}.items()
     )
 
     start_gazebo_client = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
-        )
+            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': '-g -v4 '}.items()
     )
 
-    spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'roboticarm',
-                                   '-topic', 'robot_description',
-                                  ],
-                        output='screen'
+    spawn_robot = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-name',
+            'roboarm',
+            '-topic',
+            'robot_description',
+            ],
+        output='screen'
     )
 
     return LaunchDescription([

@@ -42,20 +42,31 @@ def generate_launch_description():
     arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["arm_controller", 
-                   "--controller-manager", 
-                   "/controller_manager"
-        ],
+        arguments=[
+            "arm_controller",
+            "--controller-manager",
+            "/controller_manager"
+            ],
     )
 
     gripper_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["gripper_controller", 
-                   "--controller-manager", 
-                   "/controller_manager"
-        ],
+        arguments=[
+            "gripper_controller",
+            "--controller-manager",
+            "/controller_manager"
+            ],
     )
+
+    # effort_controller_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["effort_root1_controller",
+    #                "--controller-manager",
+    #                "/controller_manager"
+    #     ],
+    # )
 
     return LaunchDescription(
         [
@@ -63,5 +74,6 @@ def generate_launch_description():
             joint_state_broadcaster_spawner,
             arm_controller_spawner,
             gripper_controller_spawner,
+            # effort_controller_spawner
         ]
     )
