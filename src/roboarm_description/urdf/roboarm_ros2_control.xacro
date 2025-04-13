@@ -3,7 +3,7 @@
 
   <ros2_control name="roboarm" type="system">
     <hardware>
-      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
     <joint name="base_body_joint">
       <command_interface name="position">

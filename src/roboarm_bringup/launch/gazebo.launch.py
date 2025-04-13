@@ -16,7 +16,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     roboticarm_description_dir = get_package_share_directory('roboarm_description')
     roboticarm_description_share = os.path.join(get_package_prefix('roboarm_description'), 'share')
-    gazebo_ros_dir = get_package_share_directory('ros_gz_sim')
+    gazebo_ros_dir = get_package_share_directory('gazebo_ros')
 
     model_arg = DeclareLaunchArgument(name='model', default_value=os.path.join(
                                         roboticarm_description_dir, 'urdf', 'roboarm.urdf.xacro'
@@ -37,29 +37,21 @@ def generate_launch_description():
 
     start_gazebo_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
-        ),
-        # launch_arguments={'gz_args': '-r -s -v4 /home/vitya/zero_gravity.world', 'on_exit_shutdown': 'true'}.items()
-        launch_arguments={'gz_args': '-r -s -v4 empty.sdf', 'on_exit_shutdown': 'true'}.items()
+            os.path.join(gazebo_ros_dir, 'launch', 'gzserver.launch.py')
+        )
     )
 
     start_gazebo_client = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': '-g -v4 '}.items()
+            os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
+        )
     )
 
-    spawn_robot = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-name',
-            'roboarm',
-            '-topic',
-            'robot_description',
-            ],
-        output='screen'
+    spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
+                        arguments=['-entity', 'roboarm',
+                                   '-topic', 'robot_description',
+                                  ],
+                        output='screen'
     )
 
     return LaunchDescription([
