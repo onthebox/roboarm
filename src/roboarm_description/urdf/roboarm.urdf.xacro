@@ -60,6 +60,33 @@
             </collision>
         </link>
     </xacro:macro>
+    <xacro:macro name="finger_link" params="name x y z ox oy oz mass material">
+        <link name="${name}_link">
+            <visual>
+                <geometry>
+                    <box size="${x} ${y} ${z}" />
+                </geometry>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="0 0 0" />
+                <material name="${material}" />
+            </visual>
+            <xacro:box_inertia m="10.0" x="${x}" y="${y}" z="${z}" o_xyz="${ox} ${oy} ${oz}" o_rpy="0 0 0" />
+            <collision>
+                <geometry>
+                    <box size="${x} ${y} ${z}" />
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                        <!-- Основные коэффициенты трения -->
+                        <mu>1.2</mu>    <!-- Статическое трение (увеличьте для лучшего захвата) -->
+                        <mu2>1.0</mu2>  <!-- Динамическое трение -->
+                        </ode>
+                    </friction>
+                </surface>
+                <origin xyz="${ox} ${oy} ${oz}" rpy="0 0 0" />
+            </collision>
+        </link>
+    </xacro:macro>
     <xacro:macro name="box_inertia" params="m x y z o_xyz o_rpy">
         <inertial>
         <mass value="${m}" />
@@ -115,9 +142,9 @@
     <!-- Making palm link -->
     <xacro:box_link name="palm" x="${arm_width * 3}" y="${arm_width}" z="${arm_width}" ox="0" oy="0" oz="${arm_width / 2}" mass="${arm_mass}" material="orange" />
     <!-- Making left_finger_link -->
-    <xacro:box_link name="left_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.001" material="orange" />
+    <xacro:finger_link name="left_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.001" material="orange" />
     <!-- Making right_finger_link -->
-    <xacro:box_link name="right_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.001" material="orange" />
+    <xacro:finger_link name="right_finger" x="${arm_width * 0.5}" y="${arm_width * 0.5}" z="${arm_width * 4}" ox="0" oy="0" oz="${arm_width * 4 / 2}" mass="0.001" material="orange" />
     
     
     
@@ -311,7 +338,7 @@
         <child link="right_finger_link" />
         <origin xyz="${(arm_width * 3 / 2) - (arm_width * 0.5 / 2)} 0 ${arm_width}" rpy="0 0 0" />
         <axis xyz="1 0 0" />
-        <limit lower="${-(arm_width * 3 / 2) + (arm_width * 0.5)}" upper="0" velocity="2.0" effort="100"/>  
+        <limit lower="${-(arm_width * 3 / 2) + (arm_width * 0.5)}" upper="0" velocity="2.0" effort="20"/>  
         <mimic joint="palm_left_finger_joint" multiplier="-1" />
     </joint>
 </robot>

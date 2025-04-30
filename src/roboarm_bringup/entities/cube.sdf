@@ -1,0 +1,53 @@
+<?xml version='1.0'?>
+<sdf version='1.7'>
+  <model name='blue_cube'>
+    <!-- Позиция (x, y, z, roll, pitch, yaw) -->
+    <pose>0.4 0 0.1 0 0 0</pose>
+    
+    <link name='link'>
+      <!-- Физические свойства -->
+      <inertial>
+        <mass>0.1</mass>  <!-- Масса 100 грамм -->
+        <inertia>
+          <!-- Моменты инерции для куба со стороной 0.05 м -->
+          <ixx>0.0000208</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0000208</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0000208</izz>
+        </inertia>
+      </inertial>
+
+      <!-- Коллизия (для физики) -->
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>0.05 0.05 0.05</size>  <!-- Размер 5x5x5 см -->
+          </box>
+        </geometry>
+        <surface>
+            <friction>
+                <ode>
+                <!-- Основные коэффициенты трения -->
+                <mu>0.5</mu>    <!-- Статическое трение (увеличьте для лучшего захвата) -->
+                <mu2>0.5</mu2>  <!-- Динамическое трение -->
+                </ode>
+            </friction>
+        </surface>
+      </collision>
+
+      <!-- Визуализация -->
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>0.05 0.05 0.05</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0 0 1 1</ambient>  <!-- Синий цвет (RGBA) -->
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

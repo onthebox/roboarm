@@ -40,13 +40,27 @@ def generate_launch_description():
     start_gazebo_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(gazebo_ros_dir, 'launch', 'gzserver.launch.py')
-        )
+        ),
+        launch_arguments={
+            'world': '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/custom_empty.world'  # Явный путь
+        }.items()
     )
 
     start_gazebo_client = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
         )
+    )
+
+    spawn_ground = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-entity', 'ground_plane',
+            '-file', '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/ground.sdf',
+            '-z', '0.0'  # Высота (Z=0)
+        ],
+        output='screen'
     )
 
     spawn_robot = Node(
@@ -61,11 +75,28 @@ def generate_launch_description():
         output='screen'
         )
 
+    spawn_cube = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-entity',
+            'blue_cube',
+            '-file',
+            '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf',
+            '-x', '0.5',
+            '-y', '0.0',
+            '-z', '0.0',
+        ],
+        output='screen'
+    )
+
     return LaunchDescription([
         env_var,
         model_arg,
         start_gazebo_server,
         start_gazebo_client,
         robot_state_publisher_node,
+        spawn_ground,
         spawn_robot,
+        spawn_cube
     ])
