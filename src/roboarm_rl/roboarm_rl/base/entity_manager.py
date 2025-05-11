@@ -1,0 +1,83 @@
+import math
+import random
+
+import rclpy
+from gazebo_msgs.srv import DeleteEntity, SpawnEntity
+from geometry_msgs.msg import Pose, Quaternion
+from rclpy.node import Node
+
+
+class EntityManager(Node):
+    def __init__(self, entity_file, entity_name, executor):
+        super().__init__('entity_manager_node')
+        self.entity_file = entity_file
+        self.entity_name = entity_name
+        self._spawn_entity = self.create_client(SpawnEntity, "/spawn_entity")
+        self._delete_entity = self.create_client(DeleteEntity, "/delete_entity")
+        self._executor = executor
+        self._current_entity = None
+
+    def spawn(self, randomize: bool = False):
+        # Удаляем предыдущий куб (если есть) и ждем завершения
+        if self._current_entity:
+            if not self.delete():
+                self.get_logger().warn(f"Failed to delete {self._current_entity}")
+            self._current_entity = None
+
+        if randomize:
+            # Генерация случайного угла и позиции
+            angle = random.uniform(0, 2 * math.pi)
+            radius = 2.5
+            x = radius * math.cos(angle)
+            y = radius * math.sin(angle)
+
+        # Подготовка Pose
+        pose = Pose()
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = 0.05
+        pose.orientation = self._yaw_to_quaternion(angle + math.pi)
+
+        # Спавн нового куба
+        req = SpawnEntity.Request()
+        req.name = self.entity_name
+        req.xml = open(self.entity_file, 'r').read()
+        req.initial_pose = pose
+
+        future = self._spawn_entity.call_async(req)
+        rclpy.spin_until_future_complete(self, future, executor=self._executor, timeout_sec=60.0)
+
+        if future.result() is not None and future.result().success:
+            self._current_entity = self.entity_name
+            self.get_logger().info(f"Cube spawned at ({x:.2f}, {y:.2f})")
+            return True
+        else:
+            error_msg = future.result().status_message if future.result() else "Timeout"
+            self.get_logger().error(f"Failed to spawn cube: {error_msg}")
+            return False
+
+    def _yaw_to_quaternion(self, yaw):
+        """Преобразует угол yaw в Quaternion"""
+        q = Quaternion()
+        q.x = 0.0
+        q.y = 0.0
+        q.z = math.sin(yaw / 2)
+        q.w = math.cos(yaw / 2)
+        return q
+
+    def delete(self):
+        """Удаляет объект из симуляции с подтверждением"""
+        req = DeleteEntity.Request()
+        req.name = self.entity_name
+        future = self._delete_entity.call_async(req)
+        rclpy.spin_until_future_complete(self, future, executor=self.executor, timeout_sec=60.0)
+
+        if future.result() is not None:
+            if future.result().success:
+                self.get_logger().info(f"Deleted entity: {self.entity_name}")
+                return True
+            else:
+                self.get_logger().warn(f"Delete failed: {future.result().status_message}")
+        else:
+            self.get_logger().warn("Delete request timeout")
+        return False

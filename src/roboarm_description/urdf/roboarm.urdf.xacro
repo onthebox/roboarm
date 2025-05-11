@@ -1,5 +1,9 @@
 <robot name="roboarm" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <gazebo>
+        <plugin name="gazebo_ros_api" filename="libgazebo_ros_api.so"/>
+    </gazebo>
+
     <!-- Include Gazebo Parameters -->
     <xacro:include filename="$(find roboarm_description)/urdf/roboarm_gazebo.xacro" />
 

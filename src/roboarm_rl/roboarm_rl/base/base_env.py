@@ -1,39 +1,53 @@
-import math
-import random
 import time
 
 import gymnasium as gym
 import numpy as np
 import rclpy
-from gazebo_msgs.srv import DeleteEntity, SpawnEntity
-from geometry_msgs.msg import Pose, Quaternion
 from gymnasium import spaces
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
-from roboarm_rl.base.listeners import CameraNode, JointStateNode
+from roboarm_rl.base.entity_manager import EntityManager
+from roboarm_rl.base.listeners import (
+    CameraListener,
+    JointStateListener,
+    LinkPoseListener,
+)
 
 
 class RoboarmBaseEnv(gym.Env):
-    # metadata = {'render_modes': ['human', 'rgb_array']}
     def __init__(self, render_mode=None):
         rclpy.init()
 
         super(RoboarmBaseEnv, self).__init__()
 
-        # Инициализация ROS 2
+        # Инициализация ноды среды
         self.node = Node('roboarm_env')
 
-        self.joint_node = JointStateNode()
-        self.camera_node = CameraNode()
+        # Создание нод для получения состояний робота
+        self.joint_listener = JointStateListener()
+        self.camera_listener = CameraListener()
+        self.link_pose_listener = LinkPoseListener()
+
+        # Создание ноды для управления объектами
+        self.entity_manager_executor = SingleThreadedExecutor()
+        self.entity_manager = EntityManager(
+            entity_file='/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf',
+            entity_name='blue_cube',
+            executor=self.entity_manager_executor
+        )
+        self.entity_manager_executor.add_node(self.entity_manager)
 
         # Запускаем каждую ноду в своем потоке
         self.joint_executor = SingleThreadedExecutor()
-        self.joint_executor.add_node(self.joint_node)
+        self.joint_executor.add_node(self.joint_listener)
 
         self.camera_executor = SingleThreadedExecutor()
-        self.camera_executor.add_node(self.camera_node)
+        self.camera_executor.add_node(self.camera_listener)
+
+        self.link_pose_executor = SingleThreadedExecutor()
+        self.link_pose_executor.add_node(self.link_pose_listener)
 
         self.action_space = spaces.Dict({
             "arm_positions": spaces.Box(low=-1.57, high=1.57, shape=(5,), dtype=np.float32),
@@ -45,88 +59,9 @@ class RoboarmBaseEnv(gym.Env):
             "camera_image": spaces.Box(low=0, high=255, shape=(480, 640, 3), dtype=np.uint8),
         })
 
-        # ROS 2 интерфейсы
-        self._init_ros_connections()
+        self._init_publishers()
 
-        # Для визуализации
-        self.render_mode = render_mode
-        self.viewer = None
-        # Добавляем клиент для спавна объектов
-        self.spawn_entity_client = self.node.create_client(
-            SpawnEntity, '/spawn_entity')
-        self.delete_entity_client = self.node.create_client(DeleteEntity, '/delete_entity')
-        
-        # Параметры куба
-        self.cube_sdf_path = '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf'  # Укажите полный путь
-        self.cube_name = 'blue_cube'
-        self.current_cube = None
-
-    def _spawn_cube(self):
-        """Спавнит куб на окружности радиусом 0.5м"""
-        # Удаляем предыдущий куб (если есть) и ждем завершения
-        if self.current_cube:
-            if not self._delete_entity(self.current_cube):
-                self.node.get_logger().warn(f"Failed to delete {self.current_cube}")
-            self.current_cube = None
-        
-        # Генерация случайного угла и позиции
-        angle = random.uniform(0, 2 * math.pi)
-        radius = 2.5
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        
-        # Подготовка Pose
-        pose = Pose()
-        pose.position.x = x
-        pose.position.y = y
-        pose.position.z = 0.05
-        pose.orientation = self._yaw_to_quaternion(angle + math.pi)
-        
-        # Спавн нового куба
-        req = SpawnEntity.Request()
-        req.name = self.cube_name
-        req.xml = open(self.cube_sdf_path, 'r').read()
-        req.initial_pose = pose
-        
-        future = self.spawn_entity_client.call_async(req)
-        rclpy.spin_until_future_complete(self.node, future, timeout_sec=2.0)
-        
-        if future.result() is not None and future.result().success:
-            self.current_cube = self.cube_name
-            self.node.get_logger().info(f"Cube spawned at ({x:.2f}, {y:.2f})")
-            return True
-        else:
-            error_msg = future.result().status_message if future.result() else "Timeout"
-            self.node.get_logger().error(f"Failed to spawn cube: {error_msg}")
-            return False
-
-    def _delete_entity(self, name):
-        """Удаляет объект из симуляции с подтверждением"""        
-        req = DeleteEntity.Request()
-        req.name = name
-        future = self.delete_entity_client.call_async(req)
-        rclpy.spin_until_future_complete(self.node, future, timeout_sec=2.0)
-        
-        if future.result() is not None:
-            if future.result().success:
-                self.node.get_logger().info(f"Deleted entity: {name}")
-                return True
-            else:
-                self.node.get_logger().warn(f"Delete failed: {future.result().status_message}")
-        else:
-            self.node.get_logger().warn("Delete request timeout")
-        return False
-    
-    def _yaw_to_quaternion(self, yaw):
-        """Преобразует угол yaw в Quaternion"""
-        q = Quaternion()
-        q.x = 0.0
-        q.y = 0.0
-        q.z = math.sin(yaw / 2)
-        q.w = math.cos(yaw / 2)
-        return q
-
-    def _init_ros_connections(self):
+    def _init_publishers(self):
         """Инициализация ROS 2 подписчиков"""
 
         self.arm_action_pub = self.node.create_publisher(
@@ -141,19 +76,6 @@ class RoboarmBaseEnv(gym.Env):
         self.node.get_logger().info(f"Step action: {action}")
         self._publish_action(action)
 
-        start_time = time.time()
-        while time.time() - start_time < 1.0:  # Таймаут 1 сек
-            # Проверяем оба топика
-            self.joint_executor.spin_once(timeout_sec=0.01)  # Неблокирующий вызов
-            self.camera_executor.spin_once(timeout_sec=0.1)
-
-            # Если оба сообщения получены — выходим
-            if self.joint_node.has_new_data and self.camera_node.has_new_data:
-                break
-        # Ожидание обновления
-        self._last_joint_state = self.joint_node.get_state()
-        self._last_image_state = self.camera_node.get_image()
-
         # Получение наблюдения
         obs = self._get_obs()
 
@@ -164,9 +86,6 @@ class RoboarmBaseEnv(gym.Env):
         terminated = False
         truncated = False
 
-        # TEST SPAWN CUBE 
-        self._spawn_cube()
-
         # Инфо для отладки
         # info = {"is_success": self._check_grasp()}
 
@@ -175,6 +94,7 @@ class RoboarmBaseEnv(gym.Env):
     def _publish_action(self, action):
         """Отправка действия в симуляцию"""
         # Создание сообщений для публикации
+        self.node.get_logger().info(f'Action: {action}')
         arm_msg = JointTrajectory()
         gripper_msg = JointTrajectory()
 
@@ -200,15 +120,47 @@ class RoboarmBaseEnv(gym.Env):
 
     def _get_obs(self):
         """Сбор наблюдений из коллбеков"""
+
+        start_time = time.time()
+        while time.time() - start_time < 1.0:  # Таймаут 1 сек
+            # Проверяем оба топика
+            self.joint_executor.spin_once(timeout_sec=0.01)  # Неблокирующий вызов
+            self.camera_executor.spin_once(timeout_sec=0.1)
+
+            # Если оба сообщения получены — выходим
+            if self.joint_listener.has_new_data and self.camera_listener.has_new_data:
+                break
+
+        self._last_joint_state = self.joint_listener.get_state()
+        self._last_image_state = self.camera_listener.get_image()
+
         return {
             "joint_pos": self._last_joint_state,
             "camera_image": self._last_image_state
         }
 
     def _calculate_reward(self):
+        start_time = time.time()
+        while time.time() - start_time < 1.0:  # Таймаут 1 сек
+            self.link_pose_executor.spin_once(timeout_sec=0.01)
+            palm_pos = self.link_pose_listener.get_pose('palm_link')
+
+        self.node.get_logger().info(f'Palm position: {palm_pos}')
         return 1
 
+    def reset(self):
+        self.entity_manager.delete()
+        time.sleep(5)
+        self.entity_manager.spawn(randomize=True)
+        return self._get_obs(), {}
+
+    def render(self):
+        # Возвращаем последнюю картинку
+        return self._last_image_state
+
     def close(self):
-        self.joint_node.destroy_node()
-        self.camera_node.destroy_node()
+        self.joint_listener.destroy_node()
+        self.camera_listener.destroy_node()
+        self.link_pose_listener.destroy_node()
+        self.entity_manager.destroy_node()
         rclpy.shutdown()

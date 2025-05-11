@@ -10,6 +10,7 @@
   <depend>rclpy</depend>
   <depend>python3-gymnasium-pip</depend>
   <depend>python3-opencv</depend>
+  <depend>python-transforms3d-pip</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
