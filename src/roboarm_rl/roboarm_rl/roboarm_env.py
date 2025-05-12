@@ -1,5 +1,7 @@
 import time
 
+from stable_baselines3.common.env_checker import check_env
+
 # from roboarm_rl.base import RoboarmBaseEnv
 from roboarm_rl.reacher_utils.reacher_env import RoboarmReacherEnv
 
@@ -7,12 +9,13 @@ from roboarm_rl.reacher_utils.reacher_env import RoboarmReacherEnv
 def main():
 
     env = RoboarmReacherEnv()
-
-    env.reset()
-    sample_action = env.action_space.sample()
-    env.step(sample_action)
-    time.sleep(1.0)
-    env.close()
+    check_env(env)
+    # env.reset()
+    # sample_action = env.action_space.sample()
+    # env.step(sample_action)
+    # time.sleep(5.0)
+    # env.reset()
+    # env.close()
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 import math
 import random
+from typing import List
 
 import rclpy
 from gazebo_msgs.srv import DeleteEntity, SpawnEntity
@@ -8,16 +9,20 @@ from rclpy.node import Node
 
 
 class EntityManager(Node):
-    def __init__(self, entity_file, entity_name, executor):
+    def __init__(self, entity_file, entity_name, executor, timeout=30.0):
         super().__init__('entity_manager_node')
         self.entity_file = entity_file
         self.entity_name = entity_name
         self._spawn_entity = self.create_client(SpawnEntity, "/spawn_entity")
         self._delete_entity = self.create_client(DeleteEntity, "/delete_entity")
         self._executor = executor
+        self._timeout = timeout
         self._current_entity = None
 
-    def spawn(self, randomize: bool = False):
+    def spawn(self, randomize: bool = False, position: List[float] | None = None):
+
+        assert randomize ^ bool(position), "Only one of 'randomize' or 'position' can be specified"
+
         # Удаляем предыдущий куб (если есть) и ждем завершения
         if self._current_entity:
             if not self.delete():
@@ -30,12 +35,13 @@ class EntityManager(Node):
             radius = 2.5
             x = radius * math.cos(angle)
             y = radius * math.sin(angle)
+            z = 0.05
 
         # Подготовка Pose
         pose = Pose()
         pose.position.x = x
         pose.position.y = y
-        pose.position.z = 0.05
+        pose.position.z = z
         pose.orientation = self._yaw_to_quaternion(angle + math.pi)
 
         # Спавн нового куба
@@ -45,12 +51,12 @@ class EntityManager(Node):
         req.initial_pose = pose
 
         future = self._spawn_entity.call_async(req)
-        rclpy.spin_until_future_complete(self, future, executor=self._executor, timeout_sec=60.0)
+        rclpy.spin_until_future_complete(self, future, executor=self._executor, timeout_sec=self._timeout)
 
         if future.result() is not None and future.result().success:
             self._current_entity = self.entity_name
-            self.get_logger().info(f"Cube spawned at ({x:.2f}, {y:.2f})")
-            return True
+            self.get_logger().info(f"Cube spawned at ({x:.2f}, {y:.2f}, {z:.2f})")
+            return [x, y, z]
         else:
             error_msg = future.result().status_message if future.result() else "Timeout"
             self.get_logger().error(f"Failed to spawn cube: {error_msg}")
@@ -70,7 +76,7 @@ class EntityManager(Node):
         req = DeleteEntity.Request()
         req.name = self.entity_name
         future = self._delete_entity.call_async(req)
-        rclpy.spin_until_future_complete(self, future, executor=self.executor, timeout_sec=60.0)
+        rclpy.spin_until_future_complete(self, future, executor=self.executor, timeout_sec=self._timeout)
 
         if future.result() is not None:
             if future.result().success:

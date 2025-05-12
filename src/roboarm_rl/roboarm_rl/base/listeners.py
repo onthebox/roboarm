@@ -27,9 +27,9 @@ class JointStateListener(Node):
     def callback(self, msg):
 
         try:
-            self._last_joint_state = np.array(msg.position, dtype=np.float32)
+            self._last_joint_state = np.array(msg.position, dtype=np.float32)[:6]
             self.has_new_data = True
-            self.get_logger().info(f"Joint state updated: {self._last_joint_state}")
+            self.get_logger().info("New joint state received.")
         except Exception as e:
             self.get_logger().error(f"Joint state error: {e}")
 
@@ -64,12 +64,11 @@ class CameraListener(Node):
 
     def callback(self, msg):
 
-        self.get_logger().info("Hello from image callback!!!")
         try:
             # Конвертация ROS Image -> OpenCV
             self._last_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             self.has_new_data = True
-            self.get_logger().info(f"Image received: {type(self._last_image)}")
+            self.get_logger().info("New image received.")
 
         except Exception as e:
             self.get_logger().error(f"Image processing failed: {e}")
