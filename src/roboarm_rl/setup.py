@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "roboarm_env = roboarm_rl.roboarm_env:main"
+            "roboarm_env = roboarm_rl.roboarm_env:main",
+            "train_reacher = roboarm_rl.train_reacher:main"
         ],
     },
 )

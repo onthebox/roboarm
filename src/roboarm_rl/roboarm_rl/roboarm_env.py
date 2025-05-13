@@ -1,5 +1,3 @@
-import time
-
 from stable_baselines3.common.env_checker import check_env
 
 # from roboarm_rl.base import RoboarmBaseEnv
