@@ -75,20 +75,20 @@ def generate_launch_description():
         output='screen'
         )
 
-    # spawn_cube = Node(
-    #     package='gazebo_ros',
-    #     executable='spawn_entity.py',
-    #     arguments=[
-    #         '-entity',
-    #         'blue_cube',
-    #         '-file',
-    #         '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf',
-    #         '-x', '0.5',
-    #         '-y', '0.0',
-    #         '-z', '0.0',
-    #     ],
-    #     output='screen'
-    # )
+    spawn_cube = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-entity',
+            'blue_cube',
+            '-file',
+            '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf',
+            '-x', '1.0606601717798214',
+            '-y', '1.0606601717798214',
+            '-z', '0.05',
+        ],
+        output='screen'
+    )
 
     return LaunchDescription([
         env_var,
@@ -98,5 +98,5 @@ def generate_launch_description():
         robot_state_publisher_node,
         spawn_ground,
         spawn_robot,
-        # spawn_cube
+        spawn_cube
     ])

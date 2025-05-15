@@ -30,9 +30,10 @@ class EntityManager(Node):
             self._current_entity = None
 
         if randomize:
+            # sector_width = math.radians(90)
             # Генерация случайного угла и позиции
-            angle = random.uniform(0, 2 * math.pi)
-            radius = 2.5
+            angle = math.radians(random.uniform(-45, 45))
+            radius = 1.5
             x = radius * math.cos(angle)
             y = radius * math.sin(angle)
             z = 0.05
@@ -42,7 +43,8 @@ class EntityManager(Node):
         pose.position.x = x
         pose.position.y = y
         pose.position.z = z
-        pose.orientation = self._yaw_to_quaternion(angle + math.pi)
+        # face_angle = math.atan2(-y, -x)  # Направление к центру (0,0)
+        # pose.orientation = self._yaw_to_quaternion(face_angle)
 
         # Спавн нового куба
         req = SpawnEntity.Request()

@@ -18,7 +18,7 @@
     <xacro:property name="base_length" value="0.5" />
     <xacro:property name="base_height" value="0.1" />
     <xacro:property name="body_radius" value="0.1" />
-    <xacro:property name="body_length" value="0.4" />
+    <xacro:property name="body_length" value="0.6" />
     <xacro:property name="root_radius" value="0.05" />
     <xacro:property name="root_length" value="0.05" />
     <xacro:property name="root_mass" value="0.001" />

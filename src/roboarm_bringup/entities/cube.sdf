@@ -7,15 +7,14 @@
     <link name='link'>
       <!-- Физические свойства -->
       <inertial>
-        <mass>0.1</mass>  <!-- Масса 100 грамм -->
+        <mass>0.5</mass>
         <inertia>
-          <!-- Моменты инерции для куба со стороной 0.05 м -->
-          <ixx>0.0000208</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0000208</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0000208</izz>
+          <ixx>0.0005333</ixx>
+          <iyy>0.0005333</iyy>
+          <izz>0.0005333</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
         </inertia>
       </inertial>
 
@@ -23,7 +22,7 @@
       <collision name='collision'>
         <geometry>
           <box>
-            <size>0.05 0.05 0.05</size>  <!-- Размер 5x5x5 см -->
+            <size>0.1 0.1 0.1</size>  <!-- Размер 5x5x5 см -->
           </box>
         </geometry>
         <surface>
@@ -41,7 +40,7 @@
       <visual name='visual'>
         <geometry>
           <box>
-            <size>0.05 0.05 0.05</size>
+            <size>0.1 0.1 0.1</size>
           </box>
         </geometry>
         <material>

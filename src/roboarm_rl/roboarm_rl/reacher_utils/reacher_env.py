@@ -106,19 +106,20 @@ class RoboarmReacherEnv(RoboarmBaseEnv):
         start_time = time.time()
         while time.time() - start_time < 1.0:
             self.link_pose_executor.spin_once(timeout_sec=0.01)
-            palm_pos = self.link_pose_listener.get_pose('palm_link')
+            self._last_palm_pos = self.link_pose_listener.get_pose('palm_link')
 
         self.node.get_logger().info('Calculating reward...')
         # Distance from palm of the robot to the target object
-        distance = np.linalg.norm(np.array(self._entity_position) - palm_pos['position'])
+        self._last_distance = np.linalg.norm(np.array(self._entity_position) - self._last_palm_pos['position'])
         # Distance from object to the origin
         max_distance = np.linalg.norm(np.array(self._entity_position))
-        normalized_distance = distance / max_distance
+        normalized_distance = self._last_distance / max_distance
 
         distance_reward = (1 - normalized_distance) * self.num_steps
         reward = distance_reward - self._current_step
+        self._cumulative_reward += reward
 
-        self.node.get_logger().info(f'Distance to the object: {distance}')
+        self.node.get_logger().info(f'Distance to the object: {self._last_distance}')
         self.node.get_logger().info(f'Reward from distance: {distance_reward}')
         self.node.get_logger().info(f'Overall reward: {reward}')
 
@@ -142,7 +143,37 @@ class RoboarmReacherEnv(RoboarmBaseEnv):
 
         self.arm_action_pub.publish(arm_msg)
 
+    def step(self, action):
+        # Отправка действия
+        self.node.get_logger().info(f"Step {self._current_step} start.")
+        self.node.get_logger().info(f"Action:\n{action}")
+        self._publish_action(action)
+
+        # Получение наблюдения
+        obs = self._get_obs()
+
+        # Вычисление награды
+        reward = self._calculate_reward()
+
+        # Проверка завершения
+        terminated = self._last_distance <= 0.62
+        truncated = self._current_step == self.num_steps - 1
+        info = {}
+
+        if terminated or truncated:
+            info["episode"] = {
+                "r": self._cumulative_reward,  # Суммарная награда за эпизод
+                "l": self._current_step     # Длина эпизода в шагах
+            }
+
+        self.node.get_logger().info(f"Step {self._current_step} end. Terminated: {terminated}. Truncated: {truncated}.")
+
+        self._current_step += 1
+
+        return obs, reward, terminated, truncated, info
+
     def reset(self, seed=0):
+        self._cumulative_reward = 0
         self._current_step = 0
         init_pose = np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
         self._publish_action(init_pose)
