@@ -59,21 +59,11 @@ def generate_launch_description():
             ],
     )
 
-    # effort_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["effort_root1_controller",
-    #                "--controller-manager",
-    #                "/controller_manager"
-    #     ],
-    # )
-
     return LaunchDescription(
         [
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             arm_controller_spawner,
-            gripper_controller_spawner,
-            # effort_controller_spawner
+            gripper_controller_spawner
         ]
     )

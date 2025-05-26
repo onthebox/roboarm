@@ -2,8 +2,8 @@
 <sdf version='1.7'>
   <model name='blue_cube'>
     <!-- Позиция (x, y, z, roll, pitch, yaw) -->
-    <pose>0.4 0 0.1 0 0 0</pose>
-    
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
     <link name='link'>
       <!-- Физические свойства -->
       <inertial>

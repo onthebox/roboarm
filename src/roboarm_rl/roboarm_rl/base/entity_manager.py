@@ -32,7 +32,7 @@ class EntityManager(Node):
         if randomize:
             # sector_width = math.radians(90)
             # Генерация случайного угла и позиции
-            angle = math.radians(random.uniform(-45, 45))
+            angle = math.radians(random.uniform(-90, 0))
             radius = 1.5
             x = radius * math.cos(angle)
             y = radius * math.sin(angle)

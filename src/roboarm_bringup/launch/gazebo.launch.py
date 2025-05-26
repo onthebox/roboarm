@@ -52,16 +52,16 @@ def generate_launch_description():
         )
     )
 
-    spawn_ground = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
-        arguments=[
-            '-entity', 'ground_plane',
-            '-file', '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/ground.sdf',
-            '-z', '0.0'  # Высота (Z=0)
-        ],
-        output='screen'
-    )
+    # spawn_ground = Node(
+    #     package='gazebo_ros',
+    #     executable='spawn_entity.py',
+    #     arguments=[
+    #         '-entity', 'ground_plane',
+    #         '-file', '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/ground.sdf',
+    #         '-z', '0.0'  # Высота (Z=0)
+    #     ],
+    #     output='screen'
+    # )
 
     spawn_robot = Node(
         package='gazebo_ros',
@@ -83,8 +83,8 @@ def generate_launch_description():
             'blue_cube',
             '-file',
             '/home/vitya/diploma/roboarm/src/roboarm_bringup/entities/cube.sdf',
-            '-x', '1.0606601717798214',
-            '-y', '1.0606601717798214',
+            '-x', '1.38',
+            '-y', '-0.60',
             '-z', '0.05',
         ],
         output='screen'
@@ -96,7 +96,7 @@ def generate_launch_description():
         start_gazebo_server,
         start_gazebo_client,
         robot_state_publisher_node,
-        spawn_ground,
+        # spawn_ground,
         spawn_robot,
         spawn_cube
     ])
